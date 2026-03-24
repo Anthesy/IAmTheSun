@@ -7,12 +7,6 @@
             "m_Id": "7d29fdf773864e4b9a7171b28eed4f23"
         },
         {
-            "m_Id": "d0c714399e904be0915c72a78c309677"
-        },
-        {
-            "m_Id": "38c5ab7b8545422b8308a90517a953f3"
-        },
-        {
             "m_Id": "39bd1e7f0d064364838ef6edb61db17c"
         },
         {
@@ -724,13 +718,10 @@
     "m_Name": "",
     "m_ChildObjectList": [
         {
+            "m_Id": "454f931de00f4fd8b737bc7971436317"
+        },
+        {
             "m_Id": "7d29fdf773864e4b9a7171b28eed4f23"
-        },
-        {
-            "m_Id": "d0c714399e904be0915c72a78c309677"
-        },
-        {
-            "m_Id": "38c5ab7b8545422b8308a90517a953f3"
         },
         {
             "m_Id": "39bd1e7f0d064364838ef6edb61db17c"
@@ -749,9 +740,6 @@
         },
         {
             "m_Id": "9dd1461d481f46378d7c0bca56146333"
-        },
-        {
-            "m_Id": "454f931de00f4fd8b737bc7971436317"
         }
     ]
 }
@@ -1130,34 +1118,6 @@
     },
     "m_Property": {
         "m_Id": "94c6f444084b49e48429e204f3ce5631"
-    }
-}
-
-{
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
-    "m_ObjectId": "38c5ab7b8545422b8308a90517a953f3",
-    "m_Guid": {
-        "m_GuidSerialized": "cbba7a38-578d-4536-a034-a967c6d76cf5"
-    },
-    "m_Name": "Brightness",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Brightness",
-    "m_DefaultReferenceName": "_Brightness",
-    "m_OverrideReferenceName": "",
-    "m_GeneratePropertyBlock": true,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_DismissedVersion": 0,
-    "m_Precision": 0,
-    "overrideHLSLDeclaration": false,
-    "hlslDeclarationOverride": 0,
-    "m_Hidden": false,
-    "m_Value": 0.3499999940395355,
-    "m_FloatType": 0,
-    "m_RangeValues": {
-        "x": 0.0,
-        "y": 1.0
     }
 }
 
@@ -3747,34 +3707,6 @@
         "m_Guid": ""
     },
     "m_DefaultType": 0
-}
-
-{
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
-    "m_ObjectId": "d0c714399e904be0915c72a78c309677",
-    "m_Guid": {
-        "m_GuidSerialized": "a6b48c46-9051-4550-bc5a-f52c4d3946e4"
-    },
-    "m_Name": "HueOffset",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "HueOffset",
-    "m_DefaultReferenceName": "_HueOffset",
-    "m_OverrideReferenceName": "",
-    "m_GeneratePropertyBlock": true,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_DismissedVersion": 0,
-    "m_Precision": 0,
-    "overrideHLSLDeclaration": false,
-    "hlslDeclarationOverride": 0,
-    "m_Hidden": false,
-    "m_Value": 0.0,
-    "m_FloatType": 0,
-    "m_RangeValues": {
-        "x": 0.0,
-        "y": 1.0
-    }
 }
 
 {
