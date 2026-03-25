@@ -29,7 +29,7 @@ Material:
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3020
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -50,11 +50,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AtmosphereIntensity: 0.2
+    - _AtmosphereIntensity: -1.57
     - _QueueControl: 0
-    - _QueueOffset: 0
-    - _RimIntensity: 6.8
-    - _TransparancyIntensity: 6.61
+    - _QueueOffset: 20
+    - _RimIntensity: 2.2
+    - _TransparancyIntensity: 2.4
     m_Colors:
-    - _Color: {r: 0.5415094, g: 0.87054384, b: 1, a: 1}
+    - _Color: {r: 0.55646133, g: 0.7472647, b: 0.9245283, a: 1}
   m_BuildTextureStacks: []
