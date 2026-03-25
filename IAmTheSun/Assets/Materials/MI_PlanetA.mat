@@ -80,8 +80,9 @@ Material:
     m_Floats:
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _TransitionMainToSecondaryTexture: 1
+    - _TransitionMainToSecondaryTexture: 0
     - _TransitionWater: 0
+    - _XRMotionVectorsPass: 1
     m_Colors:
     - _PlanetBaseColor: {r: 0.4670546, g: 0.9433962, b: 0.44054818, a: 0}
     - _PlanetLayerColor: {r: 0.34069067, g: 0.6398284, b: 0.8301887, a: 0}
