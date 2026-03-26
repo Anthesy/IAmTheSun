@@ -1,0 +1,113 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: MI_SurfaceCAlive
+  m_Shader: {fileID: -6465566751694194690, guid: ae300820b2371b245a16f884aae25683, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _PlanetBaseNormal:
+        m_Texture: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanetBaseTexture:
+        m_Texture: {fileID: 2800000, guid: 58a564cf993165c4f9eedec09326bcb5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanetLayerNormal:
+        m_Texture: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanetLayerTexture:
+        m_Texture: {fileID: 2800000, guid: f1c3b0e0e52346143bdc5796ce183e04, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanetMask:
+        m_Texture: {fileID: 2800000, guid: f3b396fdc1576ea4c9e6bec74a1db040, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanetMaskGradiant:
+        m_Texture: {fileID: 2800000, guid: f3b396fdc1576ea4c9e6bec74a1db040, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanetSecondaryNormal:
+        m_Texture: {fileID: 2800000, guid: 5026380188243744fbba4fa27c64d089, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanetSecondaryTexture:
+        m_Texture: {fileID: 2800000, guid: d9d69b41dc55f4347bbb428d031168f9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanetWaterNormal:
+        m_Texture: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanetWaterTexture:
+        m_Texture: {fileID: 2800000, guid: 1aba109fc646b004e96b932bd6ac0ecf, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_50aa08376bd14ca3ad6d79fd9c86cd83_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 8bf152aa1c27a8f499b7cebbce6d52ee, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_5818d042a4604ae6a3e2c61a9ac51b1d_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 85773a3f8646db548ad7112889f866b8, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _TransitionMainToSecondaryTexture: 0
+    - _TransitionWater: 0
+    - _WaterOpacity: 0
+    m_Colors:
+    - _PlanetBaseColor: {r: 1, g: 0.8901961, b: 0.50980395, a: 0}
+    - _PlanetLayerColor: {r: 0, g: 0.60784316, b: 1, a: 0}
+    - _PlanetSecondaryColor: {r: 1, g: 1, b: 1, a: 0}
+    - _PlanetWaterColor: {r: 1, g: 1, b: 1, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
+--- !u!114 &9015179715293966180
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 10
