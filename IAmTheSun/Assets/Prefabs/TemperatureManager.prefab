@@ -44,8 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad98e478d9b5e7543be8422b8e4511e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChangeTemperature
-  rayDistance: 100
+  rayDistance: 500
   rayOrigin: {fileID: 0}
   debugRay: 1
-  debugOverlayInBuild: 1
+  debugOverlayInBuild: 0
   debugOverlayLocalOffset: {x: 0, y: -0.08, z: 0.6}
+  followVRHead: 1
