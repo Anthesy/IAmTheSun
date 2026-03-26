@@ -100,13 +100,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TransitionMaterials
   targetRenderer: {fileID: 9068812256985493986}
-  materialIndex: 0
+  baseMaterialIndex: 0
+  fresnelMaterialIndex: 1
   transitionDuration: 1.2
   transitionEase: 4
-  burnDelay: 2
-  frozenStateMaterial: {fileID: 2100000, guid: f1491718ae431f543908213b6a919c3f, type: 2}
-  aliveStateMaterial: {fileID: 2100000, guid: bba8c58729a1f684582d30a49db6c561, type: 2}
-  burntStateMaterial: {fileID: 2100000, guid: 3f130af973943434f892ea5b2185967c, type: 2}
+  aliveBaseStateMaterial: {fileID: 2100000, guid: bba8c58729a1f684582d30a49db6c561, type: 2}
+  burntBaseStateMaterial: {fileID: 2100000, guid: 3f130af973943434f892ea5b2185967c, type: 2}
+  frozenBaseStateMaterial: {fileID: 2100000, guid: f1491718ae431f543908213b6a919c3f, type: 2}
+  aliveFresnelStateMaterial: {fileID: 2100000, guid: 28c9662d4d562e242bb181bd3e2c178b, type: 2}
+  burntFresnelStateMaterial: {fileID: 2100000, guid: 1107361b967e7d7449854d50b597f378, type: 2}
+  frozenFresnelStateMaterial: {fileID: 2100000, guid: c5d05c1d7d08ae14ebf55a27444fb26c, type: 2}
+  transitionDelays:
+  - from: 0
+    to: 1
+    delay: 0.2
+  - from: 1
+    to: 0
+    delay: 0.2
+  - from: 1
+    to: 2
+    delay: 5
+  - from: 2
+    to: 1
+    delay: 0.5
+  - from: 0
+    to: 2
+    delay: 6
+  - from: 2
+    to: 0
+    delay: 0.5
 --- !u!135 &8105208923218879705
 SphereCollider:
   m_ObjectHideFlags: 0
