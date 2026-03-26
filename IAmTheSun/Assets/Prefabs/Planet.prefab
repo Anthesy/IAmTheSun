@@ -137,6 +137,9 @@ MonoBehaviour:
   frozenFresnelStateMaterial: {fileID: 2100000, guid: ea3de03bc40786c4999cb051d9e8952f, type: 2}
   aliveFresnelStateMaterial: {fileID: 2100000, guid: a12526f0ab92c344fa7a78dcb925411d, type: 2}
   burntFresnelStateMaterial: {fileID: 2100000, guid: d3d56c82b352b094a964ab28373ad8a3, type: 2}
+  aliveParticlePrefab: {fileID: 1544544798038223295, guid: bb749ceeb554ba549b3a45c434122977, type: 3}
+  frozenParticlePrefab: {fileID: 4954841286770730540, guid: efba62a7f3217aa4fa60f26836d28084, type: 3}
+  burntParticlePrefab: {fileID: 3230769688013441840, guid: 092eb3500041834459b26def3240fa3e, type: 3}
 --- !u!135 &8105208923218879705
 SphereCollider:
   m_ObjectHideFlags: 0

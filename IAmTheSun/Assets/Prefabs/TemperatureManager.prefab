@@ -195,4 +195,4 @@ MonoBehaviour:
   debugLineWidth: 0.05
   backgroundAudioSource: {fileID: 0}
   heatedPitch: 2
-  pitchLerpSpeed: 0.8
+  pitchLerpSpeed: 0.4

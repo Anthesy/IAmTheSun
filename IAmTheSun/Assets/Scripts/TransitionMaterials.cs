@@ -77,8 +77,16 @@ public class TransitionMaterials : MonoBehaviour
     [SerializeField] private Material aliveFresnelStateMaterial;
     [SerializeField] private Material burntFresnelStateMaterial;
 
+    [Header("Particle Effects")]
+    [SerializeField] private GameObject aliveParticlePrefab;
+    [SerializeField] private GameObject frozenParticlePrefab;
+    [SerializeField] private GameObject burntParticlePrefab;
+
     private Material runtimeMaterial;
     private Material runtimeFresnelMaterial;
+    private GameObject aliveParticleInstance;
+    private GameObject frozenParticleInstance;
+    private GameObject burntParticleInstance;
     private RuntimeBlendValues currentValues;
     private RuntimeFresnelBlendValues currentFresnelValues;
     private PlanetVisualState currentState;
@@ -189,6 +197,25 @@ public class TransitionMaterials : MonoBehaviour
             return;
         }
 
+        // Pre-instantiate all particle systems
+        if (aliveParticlePrefab != null)
+        {
+            aliveParticleInstance = Instantiate(aliveParticlePrefab, transform.position, Quaternion.identity, transform);
+            aliveParticleInstance.SetActive(false);
+        }
+
+        if (burntParticlePrefab != null)
+        {
+            burntParticleInstance = Instantiate(burntParticlePrefab, transform.position, Quaternion.identity, transform);
+            burntParticleInstance.SetActive(false);
+        }
+
+        if (frozenParticlePrefab != null)
+        {
+            frozenParticleInstance = Instantiate(frozenParticlePrefab, transform.position, Quaternion.identity, transform);
+            frozenParticleInstance.SetActive(false);
+        }
+
         // Initialize to Frozen state
         Material initialStateMaterial = frozenStateMaterial;
         Material initialFresnelStateMaterial = frozenFresnelStateMaterial;
@@ -209,6 +236,10 @@ public class TransitionMaterials : MonoBehaviour
         aliveToBurntTimer = 0f;
         burntToFrozenTimer = 0f;
         isInitialized = true;
+
+        // Spawn initial particles for Frozen state
+        StopAllParticles();
+        SpawnParticlesForState(PlanetVisualState.Frozen);
     }
 
     private void Update()
@@ -465,6 +496,9 @@ public class TransitionMaterials : MonoBehaviour
 
         ApplyTextures(targetMaterial, targetFresnelMaterial);
         
+        // Spawn new particles (let old ones finish naturally)
+        SpawnParticlesForState(state);
+        
         // Base material transition
         RuntimeBlendValues fromValues = currentValues;
         RuntimeBlendValues toValues = ToBlendValues(targetMaterial);
@@ -593,6 +627,65 @@ public class TransitionMaterials : MonoBehaviour
         if (activeTransitionTween != null && activeTransitionTween.IsActive())
         {
             activeTransitionTween.Kill();
+        }
+
+        StopAllParticles();
+    }
+
+    private void SpawnParticlesForState(PlanetVisualState state)
+    {
+        switch (state)
+        {
+            case PlanetVisualState.Alive:
+                if (aliveParticleInstance != null)
+                {
+                    aliveParticleInstance.SetActive(true);
+                    var ps = aliveParticleInstance.GetComponent<ParticleSystem>();
+                    if (ps != null) ps.Play();
+                }
+                break;
+
+            case PlanetVisualState.Burnt:
+                if (burntParticleInstance != null)
+                {
+                    burntParticleInstance.SetActive(true);
+                    var ps = burntParticleInstance.GetComponent<ParticleSystem>();
+                    if (ps != null) ps.Play();
+                }
+                break;
+
+            case PlanetVisualState.Frozen:
+                if (frozenParticleInstance != null)
+                {
+                    frozenParticleInstance.SetActive(true);
+                    var ps = frozenParticleInstance.GetComponent<ParticleSystem>();
+                    if (ps != null) ps.Play();
+                }
+                break;
+        }
+    }
+
+    private void StopAllParticles()
+    {
+        if (aliveParticleInstance != null)
+        {
+            var ps = aliveParticleInstance.GetComponent<ParticleSystem>();
+            if (ps != null) ps.Stop();
+            aliveParticleInstance.SetActive(false);
+        }
+
+        if (burntParticleInstance != null)
+        {
+            var ps = burntParticleInstance.GetComponent<ParticleSystem>();
+            if (ps != null) ps.Stop();
+            burntParticleInstance.SetActive(false);
+        }
+
+        if (frozenParticleInstance != null)
+        {
+            var ps = frozenParticleInstance.GetComponent<ParticleSystem>();
+            if (ps != null) ps.Stop();
+            frozenParticleInstance.SetActive(false);
         }
     }
 }
