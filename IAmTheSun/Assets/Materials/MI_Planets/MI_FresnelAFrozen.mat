@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MI_FresnelABurnt
+  m_Name: MI_FresnelAFrozen
   m_Shader: {fileID: -6465566751694194690, guid: 10eb311d67af5c24e91d624045d61647, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -66,6 +66,6 @@ Material:
     - _UseNoise: 1
     - _XRMotionVectorsPass: 1
     m_Colors:
-    - _Color: {r: 1, g: 0.38683844, b: 0, a: 1}
+    - _Color: {r: 0.48867923, g: 0.89974105, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
