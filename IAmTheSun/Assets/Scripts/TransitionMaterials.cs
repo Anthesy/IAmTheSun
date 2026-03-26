@@ -1,4 +1,5 @@
 using UnityEngine;
+using DG.Tweening;
 
 public class TransitionMaterials : MonoBehaviour
 {
@@ -7,33 +8,6 @@ public class TransitionMaterials : MonoBehaviour
         Frozen,
         Alive,
         Burnt
-    }
-
-    [System.Serializable]
-    private class PlanetShaderState
-    {
-        [Header("Transitions")]
-        public float transitionMainToSecondaryTexture = 0f;
-        public float transitionWater = 0f;
-
-        [Header("Masks")]
-        public Texture2D planetMask;
-        public Texture2D planetMaskGradiant;
-
-        [Header("Base")]
-        public Texture2D planetBaseNormal;
-        public Texture2D planetBaseTexture;
-        public Color planetBaseColor = Color.white;
-
-        [Header("Layer")]
-        public Texture2D planetLayerNormal;
-        public Texture2D planetLayerTexture;
-        public Color planetLayerColor = Color.white;
-
-        [Header("Secondary")]
-        public Texture2D planetSecondaryNormal;
-        public Texture2D planetSecondaryTexture;
-        public Color planetSecondaryColor = Color.white;
     }
 
     private struct RuntimeBlendValues
@@ -61,17 +35,14 @@ public class TransitionMaterials : MonoBehaviour
 
     [SerializeField] private Renderer targetRenderer;
     [SerializeField] private int materialIndex = 0;
-    [SerializeField] private float transitionSpeed = 2f;
+    [SerializeField] private float transitionDuration = 1.2f;
+    [SerializeField] private Ease transitionEase = Ease.InOutSine;
     [SerializeField] private float burnDelay = 5f;
 
-    [Header("Frozen State")]
-    [SerializeField] private PlanetShaderState frozenState = new PlanetShaderState();
-
-    [Header("Alive State")]
-    [SerializeField] private PlanetShaderState aliveState = new PlanetShaderState();
-
-    [Header("Burnt State")]
-    [SerializeField] private PlanetShaderState burntState = new PlanetShaderState();
+    [Header("State Reference Materials")]
+    [SerializeField] private Material frozenStateMaterial;
+    [SerializeField] private Material aliveStateMaterial;
+    [SerializeField] private Material burntStateMaterial;
 
     private Material runtimeMaterial;
     private RuntimeBlendValues currentValues;
@@ -79,6 +50,7 @@ public class TransitionMaterials : MonoBehaviour
     private bool isIlluminated;
     private float illuminationTimer;
     private bool isInitialized;
+    private Tween activeTransitionTween;
 
     private void Reset()
     {
@@ -87,7 +59,29 @@ public class TransitionMaterials : MonoBehaviour
             targetRenderer = GetComponentInChildren<Renderer>();
         }
 
-        ApplyShaderDefaultsToAllStates();
+        if (targetRenderer != null)
+        {
+            Material[] sharedMats = targetRenderer.sharedMaterials;
+            if (sharedMats != null && sharedMats.Length > 0)
+            {
+                Material fallback = (materialIndex >= 0 && materialIndex < sharedMats.Length) ? sharedMats[materialIndex] : sharedMats[0];
+
+                if (frozenStateMaterial == null)
+                {
+                    frozenStateMaterial = fallback;
+                }
+
+                if (aliveStateMaterial == null)
+                {
+                    aliveStateMaterial = fallback;
+                }
+
+                if (burntStateMaterial == null)
+                {
+                    burntStateMaterial = fallback;
+                }
+            }
+        }
     }
 
     private void Awake()
@@ -141,9 +135,10 @@ public class TransitionMaterials : MonoBehaviour
             return;
         }
 
-        RuntimeBlendValues initialValues = ToBlendValues(frozenState);
+        Material initialStateMaterial = GetStateReferenceMaterial(PlanetVisualState.Frozen);
+        RuntimeBlendValues initialValues = ToBlendValues(initialStateMaterial);
         currentValues = initialValues;
-        ApplyTextures(frozenState);
+        ApplyTextures(initialStateMaterial);
         ApplyBlendedValues();
 
         targetState = PlanetVisualState.Frozen;
@@ -160,7 +155,7 @@ public class TransitionMaterials : MonoBehaviour
         }
 
         UpdateStateMachine();
-        BlendTowardTargetState();
+        // Values are blended by DOTween when target state changes.
     }
 
     public void SetIlluminated(bool illuminated)
@@ -203,66 +198,103 @@ public class TransitionMaterials : MonoBehaviour
         }
 
         targetState = newTargetState;
-        ApplyTextures(GetTargetStateData());
+        StartTransitionToState(targetState);
     }
 
-    private void BlendTowardTargetState()
-    {
-        PlanetShaderState targetData = GetTargetStateData();
-        RuntimeBlendValues targetValues = ToBlendValues(targetData);
-
-        float floatStep = transitionSpeed * Time.deltaTime;
-        float colorLerpT = 1f - Mathf.Exp(-transitionSpeed * Time.deltaTime);
-
-        currentValues.transitionMainToSecondaryTexture = Mathf.MoveTowards(currentValues.transitionMainToSecondaryTexture, targetValues.transitionMainToSecondaryTexture, floatStep);
-        currentValues.transitionWater = Mathf.MoveTowards(currentValues.transitionWater, targetValues.transitionWater, floatStep);
-        currentValues.planetBaseColor = Color.Lerp(currentValues.planetBaseColor, targetValues.planetBaseColor, colorLerpT);
-        currentValues.planetLayerColor = Color.Lerp(currentValues.planetLayerColor, targetValues.planetLayerColor, colorLerpT);
-        currentValues.planetSecondaryColor = Color.Lerp(currentValues.planetSecondaryColor, targetValues.planetSecondaryColor, colorLerpT);
-
-        ApplyBlendedValues();
-    }
-
-    private PlanetShaderState GetTargetStateData()
+    private Material GetStateReferenceMaterial(PlanetVisualState state)
     {
         switch (targetState)
         {
             case PlanetVisualState.Alive:
-                return aliveState;
+                return aliveStateMaterial;
             case PlanetVisualState.Burnt:
-                return burntState;
+                return burntStateMaterial;
             default:
-                return frozenState;
+                return frozenStateMaterial;
         }
     }
 
-    private RuntimeBlendValues ToBlendValues(PlanetShaderState state)
+    private RuntimeBlendValues ToBlendValues(Material source)
     {
+        if (source == null)
+        {
+            return currentValues;
+        }
+
         return new RuntimeBlendValues
         {
-            transitionMainToSecondaryTexture = state.transitionMainToSecondaryTexture,
-            transitionWater = state.transitionWater,
-            planetBaseColor = state.planetBaseColor,
-            planetLayerColor = state.planetLayerColor,
-            planetSecondaryColor = state.planetSecondaryColor
+            transitionMainToSecondaryTexture = source.HasProperty(TransitionMainToSecondaryTextureId)
+                ? source.GetFloat(TransitionMainToSecondaryTextureId)
+                : 0f,
+            transitionWater = source.HasProperty(TransitionWaterId)
+                ? source.GetFloat(TransitionWaterId)
+                : 0f,
+            planetBaseColor = source.HasProperty(PlanetBaseColorId)
+                ? source.GetColor(PlanetBaseColorId)
+                : Color.white,
+            planetLayerColor = source.HasProperty(PlanetLayerColorId)
+                ? source.GetColor(PlanetLayerColorId)
+                : Color.white,
+            planetSecondaryColor = source.HasProperty(PlanetSecondaryColorId)
+                ? source.GetColor(PlanetSecondaryColorId)
+                : Color.white
         };
     }
 
-    private void ApplyTextures(PlanetShaderState state)
+    private void ApplyTextures(Material stateMaterial)
     {
-        if (runtimeMaterial == null)
+        if (runtimeMaterial == null || stateMaterial == null)
         {
             return;
         }
 
-        SetTextureIfExists(PlanetMaskId, state.planetMask);
-        SetTextureIfExists(PlanetMaskGradiantId, state.planetMaskGradiant);
-        SetTextureIfExists(PlanetBaseNormalId, state.planetBaseNormal);
-        SetTextureIfExists(PlanetBaseTextureId, state.planetBaseTexture);
-        SetTextureIfExists(PlanetLayerNormalId, state.planetLayerNormal);
-        SetTextureIfExists(PlanetLayerTextureId, state.planetLayerTexture);
-        SetTextureIfExists(PlanetSecondaryNormalId, state.planetSecondaryNormal);
-        SetTextureIfExists(PlanetSecondaryTextureId, state.planetSecondaryTexture);
+        SetTextureFromMaterialIfExists(PlanetMaskId, stateMaterial);
+        SetTextureFromMaterialIfExists(PlanetMaskGradiantId, stateMaterial);
+        SetTextureFromMaterialIfExists(PlanetBaseNormalId, stateMaterial);
+        SetTextureFromMaterialIfExists(PlanetBaseTextureId, stateMaterial);
+        SetTextureFromMaterialIfExists(PlanetLayerNormalId, stateMaterial);
+        SetTextureFromMaterialIfExists(PlanetLayerTextureId, stateMaterial);
+        SetTextureFromMaterialIfExists(PlanetSecondaryNormalId, stateMaterial);
+        SetTextureFromMaterialIfExists(PlanetSecondaryTextureId, stateMaterial);
+    }
+
+    private void StartTransitionToState(PlanetVisualState state)
+    {
+        Material targetMaterial = GetStateReferenceMaterial(state);
+        if (targetMaterial == null)
+        {
+            return;
+        }
+
+        ApplyTextures(targetMaterial);
+        RuntimeBlendValues fromValues = currentValues;
+        RuntimeBlendValues toValues = ToBlendValues(targetMaterial);
+
+        if (activeTransitionTween != null && activeTransitionTween.IsActive())
+        {
+            activeTransitionTween.Kill();
+        }
+
+        float tweenProgress = 0f;
+        float safeDuration = Mathf.Max(0.01f, transitionDuration);
+
+        activeTransitionTween = DOTween.To(() => tweenProgress, x =>
+        {
+            tweenProgress = x;
+            currentValues.transitionMainToSecondaryTexture = Mathf.Lerp(fromValues.transitionMainToSecondaryTexture, toValues.transitionMainToSecondaryTexture, tweenProgress);
+            currentValues.transitionWater = Mathf.Lerp(fromValues.transitionWater, toValues.transitionWater, tweenProgress);
+            currentValues.planetBaseColor = Color.Lerp(fromValues.planetBaseColor, toValues.planetBaseColor, tweenProgress);
+            currentValues.planetLayerColor = Color.Lerp(fromValues.planetLayerColor, toValues.planetLayerColor, tweenProgress);
+            currentValues.planetSecondaryColor = Color.Lerp(fromValues.planetSecondaryColor, toValues.planetSecondaryColor, tweenProgress);
+            ApplyBlendedValues();
+        }, 1f, safeDuration)
+        .SetEase(transitionEase)
+        .SetLink(gameObject)
+        .OnComplete(() =>
+        {
+            currentValues = toValues;
+            ApplyBlendedValues();
+        });
     }
 
     private void ApplyBlendedValues()
@@ -295,129 +327,19 @@ public class TransitionMaterials : MonoBehaviour
         }
     }
 
-    private void SetTextureIfExists(int propertyId, Texture value)
+    private void SetTextureFromMaterialIfExists(int propertyId, Material source)
     {
-        if (runtimeMaterial.HasProperty(propertyId))
+        if (runtimeMaterial.HasProperty(propertyId) && source.HasProperty(propertyId))
         {
-            runtimeMaterial.SetTexture(propertyId, value);
+            runtimeMaterial.SetTexture(propertyId, source.GetTexture(propertyId));
         }
     }
 
-    private void ApplyShaderDefaultsToAllStates()
+    private void OnDestroy()
     {
-        if (!TryGetReferenceMaterial(out Material referenceMaterial))
+        if (activeTransitionTween != null && activeTransitionTween.IsActive())
         {
-            return;
+            activeTransitionTween.Kill();
         }
-
-        Material shaderDefaultsMaterial = new Material(referenceMaterial.shader);
-
-        CopyStateFromMaterial(shaderDefaultsMaterial, frozenState);
-        CopyStateFromMaterial(shaderDefaultsMaterial, aliveState);
-        CopyStateFromMaterial(shaderDefaultsMaterial, burntState);
-
-#if UNITY_EDITOR
-        if (Application.isPlaying)
-        {
-            Destroy(shaderDefaultsMaterial);
-        }
-        else
-        {
-            DestroyImmediate(shaderDefaultsMaterial);
-        }
-#else
-        Destroy(shaderDefaultsMaterial);
-#endif
-    }
-
-    private bool TryGetReferenceMaterial(out Material referenceMaterial)
-    {
-        referenceMaterial = null;
-
-        if (targetRenderer == null)
-        {
-            return false;
-        }
-
-        Material[] mats = targetRenderer.sharedMaterials;
-        if (mats == null || mats.Length == 0)
-        {
-            return false;
-        }
-
-        if (materialIndex >= 0 && materialIndex < mats.Length)
-        {
-            referenceMaterial = mats[materialIndex];
-        }
-
-        if (referenceMaterial == null)
-        {
-            for (int i = 0; i < mats.Length; i++)
-            {
-                if (mats[i] != null && mats[i].HasProperty(TransitionWaterId))
-                {
-                    referenceMaterial = mats[i];
-                    materialIndex = i;
-                    break;
-                }
-            }
-        }
-
-        return referenceMaterial != null;
-    }
-
-    private void CopyStateFromMaterial(Material source, PlanetShaderState target)
-    {
-        target.transitionMainToSecondaryTexture = source.HasProperty(TransitionMainToSecondaryTextureId)
-            ? source.GetFloat(TransitionMainToSecondaryTextureId)
-            : 0f;
-
-        target.transitionWater = source.HasProperty(TransitionWaterId)
-            ? source.GetFloat(TransitionWaterId)
-            : 0f;
-
-        target.planetMask = source.HasProperty(PlanetMaskId)
-            ? source.GetTexture(PlanetMaskId) as Texture2D
-            : null;
-
-        target.planetMaskGradiant = source.HasProperty(PlanetMaskGradiantId)
-            ? source.GetTexture(PlanetMaskGradiantId) as Texture2D
-            : null;
-
-        target.planetBaseNormal = source.HasProperty(PlanetBaseNormalId)
-            ? source.GetTexture(PlanetBaseNormalId) as Texture2D
-            : null;
-
-        target.planetBaseTexture = source.HasProperty(PlanetBaseTextureId)
-            ? source.GetTexture(PlanetBaseTextureId) as Texture2D
-            : null;
-
-        target.planetBaseColor = source.HasProperty(PlanetBaseColorId)
-            ? source.GetColor(PlanetBaseColorId)
-            : Color.white;
-
-        target.planetLayerNormal = source.HasProperty(PlanetLayerNormalId)
-            ? source.GetTexture(PlanetLayerNormalId) as Texture2D
-            : null;
-
-        target.planetLayerTexture = source.HasProperty(PlanetLayerTextureId)
-            ? source.GetTexture(PlanetLayerTextureId) as Texture2D
-            : null;
-
-        target.planetLayerColor = source.HasProperty(PlanetLayerColorId)
-            ? source.GetColor(PlanetLayerColorId)
-            : Color.white;
-
-        target.planetSecondaryNormal = source.HasProperty(PlanetSecondaryNormalId)
-            ? source.GetTexture(PlanetSecondaryNormalId) as Texture2D
-            : null;
-
-        target.planetSecondaryTexture = source.HasProperty(PlanetSecondaryTextureId)
-            ? source.GetTexture(PlanetSecondaryTextureId) as Texture2D
-            : null;
-
-        target.planetSecondaryColor = source.HasProperty(PlanetSecondaryColorId)
-            ? source.GetColor(PlanetSecondaryColorId)
-            : Color.white;
     }
 }
