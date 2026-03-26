@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1888281942613413317}
   - component: {fileID: 1841190157865996248}
   m_Layer: 0
-  m_Name: ______TemperatureManager
+  m_Name: TemperatureManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -14,7 +14,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e431fbf91d8c95049a41d8e8b9fe2b75, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1.04
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e431fbf91d8c95049a41d8e8b9fe2b75, type: 3}
       propertyPath: m_LocalPosition.z
@@ -55,14 +55,14 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: e431fbf91d8c95049a41d8e8b9fe2b75, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 28c9662d4d562e242bb181bd3e2c178b, type: 2}
+      objectReference: {fileID: 2100000, guid: 7f71ec81b3ec30c47ab82600ba491d4d, type: 2}
     - target: {fileID: -7511558181221131132, guid: e431fbf91d8c95049a41d8e8b9fe2b75, type: 3}
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
-      objectReference: {fileID: 2100000, guid: 28c9662d4d562e242bb181bd3e2c178b, type: 2}
+      objectReference: {fileID: 2100000, guid: ea3de03bc40786c4999cb051d9e8952f, type: 2}
     - target: {fileID: 919132149155446097, guid: e431fbf91d8c95049a41d8e8b9fe2b75, type: 3}
       propertyPath: m_Name
-      value: Prefab_Planet
+      value: Planet
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e431fbf91d8c95049a41d8e8b9fe2b75, type: 3}
       propertyPath: m_TagString
@@ -123,35 +123,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TransitionMaterials
   targetRenderer: {fileID: 9068812256985493986}
-  baseMaterialIndex: 0
+  materialIndex: 0
   fresnelMaterialIndex: 1
-  transitionDuration: 1.2
+  transitionDuration: 0.2
   transitionEase: 4
-  aliveBaseStateMaterial: {fileID: 2100000, guid: 28c9662d4d562e242bb181bd3e2c178b, type: 2}
-  burntBaseStateMaterial: {fileID: 2100000, guid: 1107361b967e7d7449854d50b597f378, type: 2}
-  frozenBaseStateMaterial: {fileID: 2100000, guid: c5d05c1d7d08ae14ebf55a27444fb26c, type: 2}
-  aliveFresnelStateMaterial: {fileID: 2100000, guid: 28c9662d4d562e242bb181bd3e2c178b, type: 2}
-  burntFresnelStateMaterial: {fileID: 2100000, guid: 1107361b967e7d7449854d50b597f378, type: 2}
-  frozenFresnelStateMaterial: {fileID: 2100000, guid: c5d05c1d7d08ae14ebf55a27444fb26c, type: 2}
-  transitionDelays:
-  - from: 0
-    to: 1
-    delay: 0.2
-  - from: 1
-    to: 0
-    delay: 0.2
-  - from: 1
-    to: 2
-    delay: 5
-  - from: 2
-    to: 1
-    delay: 0.5
-  - from: 0
-    to: 2
-    delay: 6
-  - from: 2
-    to: 0
-    delay: 0.5
+  frozenToAliveDelay: 0.2
+  aliveToFrozenDelay: 0.5
+  aliveToBurntDelay: 2
+  burntToFrozenDelay: 1
+  frozenStateMaterial: {fileID: 2100000, guid: 7f71ec81b3ec30c47ab82600ba491d4d, type: 2}
+  aliveStateMaterial: {fileID: 2100000, guid: 1c5842d5a755b8a418eae38d744fa1cb, type: 2}
+  burntStateMaterial: {fileID: 2100000, guid: e2b5ad2b4bca62e4fb9cb8d8e86349a0, type: 2}
+  frozenFresnelStateMaterial: {fileID: 2100000, guid: ea3de03bc40786c4999cb051d9e8952f, type: 2}
+  aliveFresnelStateMaterial: {fileID: 2100000, guid: a12526f0ab92c344fa7a78dcb925411d, type: 2}
+  burntFresnelStateMaterial: {fileID: 2100000, guid: d3d56c82b352b094a964ab28373ad8a3, type: 2}
 --- !u!135 &8105208923218879705
 SphereCollider:
   m_ObjectHideFlags: 0
