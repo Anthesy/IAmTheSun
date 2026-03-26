@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MA_PlanetTest_Alive
+  m_Name: MI_PlanetA_Frozen
   m_Shader: {fileID: -6465566751694194690, guid: ae300820b2371b245a16f884aae25683, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -73,13 +73,13 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _TransitionMainToSecondaryTexture: 1
-    - _TransitionWater: 0
+    - _TransitionWater: 6
     - _WaterOpacity: 1
     - _XRMotionVectorsPass: 1
     m_Colors:
     - _PlanetBaseColor: {r: 0.4670546, g: 0.9433962, b: 0.44054818, a: 0}
-    - _PlanetSecondaryColor: {r: 0.31691152, g: 1, b: 0.28773582, a: 0}
-    - _PlanetWaterColor: {r: 0.34069067, g: 0.6398284, b: 0.8301887, a: 0}
+    - _PlanetSecondaryColor: {r: 1, g: 1, b: 1, a: 0}
+    - _PlanetWaterColor: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &8154722888707474879

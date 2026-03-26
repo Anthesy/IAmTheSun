@@ -1,9 +1,10 @@
 using UnityEngine;
 using DG.Tweening;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
+/// <summary>
+/// Manages smooth material transitions between three planet visual states: Frozen, Alive, and Burnt.
+/// Uses a single material slot with float/color blending during transitions.
+/// </summary>
 public class TransitionMaterials : MonoBehaviour
 {
     private enum PlanetVisualState
@@ -13,11 +14,24 @@ public class TransitionMaterials : MonoBehaviour
         Burnt
     }
 
+    private struct RuntimeBlendValues
+    {
+        public float transitionMainToSecondaryTexture;
+        public float transitionWater;
+        public Color planetBaseColor;
+        public Color planetLayerColor;
+        public Color planetSecondaryColor;
+    }
 
-
-    private System.Collections.Generic.Dictionary<int, float> currentFloats = new System.Collections.Generic.Dictionary<int, float>();
-    private System.Collections.Generic.Dictionary<int, Color> currentColors = new System.Collections.Generic.Dictionary<int, Color>();
-    private System.Collections.Generic.Dictionary<int, Texture> currentTextures = new System.Collections.Generic.Dictionary<int, Texture>();
+    private struct RuntimeFresnelBlendValues
+    {
+        public float rimIntensity;
+        public float atmosphereIntensity;
+        public Color color;
+        public float noiseSpeed;
+        public float noiseScale;
+        public float emissiveStrength;
+    }
 
     private static readonly int TransitionMainToSecondaryTextureId = Shader.PropertyToID("_TransitionMainToSecondaryTexture");
     private static readonly int TransitionWaterId = Shader.PropertyToID("_TransitionWater");
@@ -29,40 +43,54 @@ public class TransitionMaterials : MonoBehaviour
     private static readonly int PlanetLayerTextureId = Shader.PropertyToID("_PlanetLayerTexture");
     private static readonly int PlanetSecondaryNormalId = Shader.PropertyToID("_PlanetSecondaryNormal");
     private static readonly int PlanetSecondaryTextureId = Shader.PropertyToID("_PlanetSecondaryTexture");
+    private static readonly int PlanetBaseColorId = Shader.PropertyToID("_PlanetBaseColor");
+    private static readonly int PlanetLayerColorId = Shader.PropertyToID("_PlanetLayerColor");
+    private static readonly int PlanetSecondaryColorId = Shader.PropertyToID("_PlanetSecondaryColor");
+
+    // Fresnel property IDs
+    private static readonly int RimIntensityId = Shader.PropertyToID("_RimIntensity");
+    private static readonly int AtmosphereIntensityId = Shader.PropertyToID("_AtmosphereIntensity");
+    private static readonly int FresnelColorId = Shader.PropertyToID("_Color");
+    private static readonly int NoiseSpeedId = Shader.PropertyToID("_NoiseSpeed");
+    private static readonly int NoiseScaleId = Shader.PropertyToID("_NoiseScale");
+    private static readonly int EmissiveStrengthId = Shader.PropertyToID("_EmissiveStrength");
 
     [SerializeField] private Renderer targetRenderer;
-    [SerializeField] private int baseMaterialIndex = 0;
+    [SerializeField] private int materialIndex = 0;
     [SerializeField] private int fresnelMaterialIndex = 1;
     [SerializeField] private float transitionDuration = 1.2f;
     [SerializeField] private Ease transitionEase = Ease.InOutSine;
 
-    [Header("Base State Reference Materials")]
-    [SerializeField] private Material aliveBaseStateMaterial;
-    [SerializeField] private Material burntBaseStateMaterial;
-    [SerializeField] private Material frozenBaseStateMaterial;
+    [Header("State Transition Delays")]
+    [SerializeField] private float frozenToAliveDelay = 0f;
+    [SerializeField] private float aliveToFrozenDelay = 0f;
+    [SerializeField] private float aliveToBurntDelay = 5f;
+    [SerializeField] private float burntToFrozenDelay = 0f;
+
+    [Header("State Reference Materials")]
+    [SerializeField] private Material frozenStateMaterial;
+    [SerializeField] private Material aliveStateMaterial;
+    [SerializeField] private Material burntStateMaterial;
 
     [Header("Fresnel State Reference Materials")]
-    
+    [SerializeField] private Material frozenFresnelStateMaterial;
     [SerializeField] private Material aliveFresnelStateMaterial;
     [SerializeField] private Material burntFresnelStateMaterial;
-    [SerializeField] private Material frozenFresnelStateMaterial;
 
-    [Header("Transition Delays")]
-    [SerializeField] [Min(0f)] private float delayFrozenToAlive = 0.2f;
-    [SerializeField] [Min(0f)] private float delayAliveToFrozen = 0.2f;
-    [SerializeField] [Min(0f)] private float delayAliveToBurnt = 5f;
-    [SerializeField] [Min(0f)] private float delayBurntToFrozen = 0.5f;
-    [SerializeField] private bool debugLogging = false; // Enable to see what's being transitioned
-
-    private Material runtimeBaseMaterial;
+    private Material runtimeMaterial;
     private Material runtimeFresnelMaterial;
-    private PlanetVisualState currentState = PlanetVisualState.Frozen;
-    private PlanetVisualState pendingState = PlanetVisualState.Frozen;
+    private RuntimeBlendValues currentValues;
+    private RuntimeFresnelBlendValues currentFresnelValues;
+    private PlanetVisualState currentState;
     private bool isIlluminated;
-    private float stateChangeTimer;
-    private float aliveElapsedTime; // Time spent in Alive state
     private bool isInitialized;
     private Tween activeTransitionTween;
+
+    // Timers for tracking state transition delays
+    private float frozenToAliveTimer;
+    private float aliveToFrozenTimer;
+    private float aliveToBurntTimer;
+    private float burntToFrozenTimer;
 
     private void Reset()
     {
@@ -76,38 +104,26 @@ public class TransitionMaterials : MonoBehaviour
             Material[] sharedMats = targetRenderer.sharedMaterials;
             if (sharedMats != null && sharedMats.Length > 0)
             {
-                Material fallbackBase = (baseMaterialIndex >= 0 && baseMaterialIndex < sharedMats.Length) ? sharedMats[baseMaterialIndex] : sharedMats[0];
+                Material fallbackBase = (materialIndex >= 0 && materialIndex < sharedMats.Length) ? sharedMats[materialIndex] : sharedMats[0];
                 Material fallbackFresnel = (fresnelMaterialIndex >= 0 && fresnelMaterialIndex < sharedMats.Length) ? sharedMats[fresnelMaterialIndex] : fallbackBase;
 
-                if (frozenBaseStateMaterial == null)
-                {
-                    frozenBaseStateMaterial = fallbackBase;
-                }
+                if (frozenStateMaterial == null)
+                    frozenStateMaterial = fallbackBase;
 
-                if (aliveBaseStateMaterial == null)
-                {
-                    aliveBaseStateMaterial = fallbackBase;
-                }
+                if (aliveStateMaterial == null)
+                    aliveStateMaterial = fallbackBase;
 
-                if (burntBaseStateMaterial == null)
-                {
-                    burntBaseStateMaterial = fallbackBase;
-                }
+                if (burntStateMaterial == null)
+                    burntStateMaterial = fallbackBase;
 
                 if (frozenFresnelStateMaterial == null)
-                {
                     frozenFresnelStateMaterial = fallbackFresnel;
-                }
 
                 if (aliveFresnelStateMaterial == null)
-                {
                     aliveFresnelStateMaterial = fallbackFresnel;
-                }
 
                 if (burntFresnelStateMaterial == null)
-                {
                     burntFresnelStateMaterial = fallbackFresnel;
-                }
             }
         }
     }
@@ -121,7 +137,7 @@ public class TransitionMaterials : MonoBehaviour
 
         if (targetRenderer == null)
         {
-            Debug.LogWarning("TransitionMaterials: No Renderer found.");
+            Debug.LogError("TransitionMaterials: No Renderer found on this GameObject or children.", gameObject);
             return;
         }
 
@@ -129,59 +145,69 @@ public class TransitionMaterials : MonoBehaviour
 
         if (mats.Length == 0)
         {
-            Debug.LogWarning("TransitionMaterials: Renderer has no materials.");
+            Debug.LogError("TransitionMaterials: Renderer has no materials.", targetRenderer.gameObject);
             return;
         }
 
-        if (baseMaterialIndex >= 0 && baseMaterialIndex < mats.Length && mats[baseMaterialIndex] != null)
+        if (materialIndex < 0 || materialIndex >= mats.Length)
         {
-            runtimeBaseMaterial = new Material(mats[baseMaterialIndex]);
+            Debug.LogError($"TransitionMaterials: Material index {materialIndex} out of range (count={mats.Length}).", targetRenderer.gameObject);
+            return;
         }
 
-        if (fresnelMaterialIndex >= 0 && fresnelMaterialIndex < mats.Length && mats[fresnelMaterialIndex] != null)
+        if (fresnelMaterialIndex < 0 || fresnelMaterialIndex >= mats.Length)
+        {
+            Debug.LogError($"TransitionMaterials: Fresnel material index {fresnelMaterialIndex} out of range (count={mats.Length}).", targetRenderer.gameObject);
+            return;
+        }
+
+        // Create runtime instances
+        if (mats[materialIndex] != null)
+        {
+            runtimeMaterial = new Material(mats[materialIndex]);
+            mats[materialIndex] = runtimeMaterial;
+        }
+
+        if (mats[fresnelMaterialIndex] != null)
         {
             runtimeFresnelMaterial = new Material(mats[fresnelMaterialIndex]);
-        }
-
-        // Assign the material instances back to the renderer
-        if (runtimeBaseMaterial != null)
-        {
-            mats[baseMaterialIndex] = runtimeBaseMaterial;
-        }
-
-        if (runtimeFresnelMaterial != null)
-        {
             mats[fresnelMaterialIndex] = runtimeFresnelMaterial;
         }
 
         targetRenderer.materials = mats;
 
-        if (runtimeBaseMaterial == null || runtimeFresnelMaterial == null)
+        if (runtimeMaterial == null || runtimeFresnelMaterial == null)
         {
-            Debug.LogWarning($"TransitionMaterials: invalid material indices on renderer '{targetRenderer.name}' (count={mats.Length}), baseIndex={baseMaterialIndex}, fresnelIndex={fresnelMaterialIndex}.");
+            Debug.LogError($"TransitionMaterials: Failed to create runtime materials.", targetRenderer.gameObject);
             return;
         }
 
-        if (!runtimeBaseMaterial.HasProperty(TransitionWaterId))
+        // Validate the frozen materials exist
+        if (frozenStateMaterial == null || frozenFresnelStateMaterial == null)
         {
-            Debug.LogWarning($"TransitionMaterials: '_TransitionWater' not found on base material index {baseMaterialIndex} ('{runtimeBaseMaterial.name}').");
+            Debug.LogError("TransitionMaterials: Frozen state materials are not assigned.", gameObject);
             return;
         }
 
-        Material initialBaseStateMaterial = GetBaseStateReferenceMaterial(PlanetVisualState.Frozen);
-        Material initialFresnelStateMaterial = GetFresnelStateReferenceMaterial(PlanetVisualState.Frozen);
-        ExtractAllFloatsAndColors(initialBaseStateMaterial, currentFloats, currentColors);
-        ExtractAllTextures(initialBaseStateMaterial, currentTextures);
-        ApplyTextures(runtimeBaseMaterial, initialBaseStateMaterial);
-        ApplyTextures(runtimeFresnelMaterial, initialFresnelStateMaterial);
-        ApplyAllFloatsAndColors();
-        ApplyAllTextures();
+        // Initialize to Frozen state
+        Material initialStateMaterial = frozenStateMaterial;
+        Material initialFresnelStateMaterial = frozenFresnelStateMaterial;
+        
+        RuntimeBlendValues initialValues = ToBlendValues(initialStateMaterial);
+        RuntimeFresnelBlendValues initialFresnelValues = ToFresnelBlendValues(initialFresnelStateMaterial);
+        
+        currentValues = initialValues;
+        currentFresnelValues = initialFresnelValues;
+        
+        ApplyTextures(initialStateMaterial, initialFresnelStateMaterial);
+        ApplyBlendedValues();
 
         currentState = PlanetVisualState.Frozen;
-        pendingState = currentState;
         isIlluminated = false;
-        stateChangeTimer = 0f;
-        aliveElapsedTime = 0f;
+        frozenToAliveTimer = 0f;
+        aliveToFrozenTimer = 0f;
+        aliveToBurntTimer = 0f;
+        burntToFrozenTimer = 0f;
         isInitialized = true;
     }
 
@@ -193,7 +219,6 @@ public class TransitionMaterials : MonoBehaviour
         }
 
         UpdateStateMachine();
-        // Values are blended by DOTween when target state changes.
     }
 
     public void SetIlluminated(bool illuminated)
@@ -213,65 +238,79 @@ public class TransitionMaterials : MonoBehaviour
 
     private void UpdateStateMachine()
     {
-        // Track time spent in Alive state
-        if (currentState == PlanetVisualState.Alive && isIlluminated)
+        // Update transition timers based on current state and conditions
+        if (currentState == PlanetVisualState.Frozen)
         {
-            aliveElapsedTime += Time.deltaTime;
-            
-            // Auto-transition to Burnt if delay exceeded
-            if (aliveElapsedTime >= delayAliveToBurnt)
+            if (isIlluminated)
             {
-                pendingState = PlanetVisualState.Burnt;
-                stateChangeTimer = delayAliveToBurnt; // Bypass delay timer, go immediately
-                StartTransitionToState(PlanetVisualState.Burnt);
-                currentState = PlanetVisualState.Burnt;
-                stateChangeTimer = 0f;
-                return;
+                frozenToAliveTimer += Time.deltaTime;
+            }
+            else
+            {
+                frozenToAliveTimer = 0f;
             }
         }
         else
         {
-            aliveElapsedTime = 0f; // Reset when leaving Alive or not illuminated
+            frozenToAliveTimer = 0f;
         }
 
-        PlanetVisualState desiredState = CalculateDesiredState();
-
-        // If desired state is the current state, don't attempt a transition
-        if (desiredState == currentState)
+        if (currentState == PlanetVisualState.Alive)
         {
-            return;
-        }
-
-        if (pendingState != desiredState)
-        {
-            if (IsValidTransition(currentState, desiredState))
+            if (!isIlluminated)
             {
-                pendingState = desiredState;
-                stateChangeTimer = 0f;
+                aliveToFrozenTimer += Time.deltaTime;
             }
             else
             {
-                return;
+                aliveToFrozenTimer = 0f;
+            }
+
+            if (isIlluminated)
+            {
+                aliveToBurntTimer += Time.deltaTime;
+            }
+            else
+            {
+                aliveToBurntTimer = 0f;
             }
         }
-
-        if (pendingState == currentState)
+        else
         {
-            return;
+            aliveToFrozenTimer = 0f;
+            aliveToBurntTimer = 0f;
         }
 
-        float requiredDelay = GetTransitionDelay(currentState, pendingState);
-        stateChangeTimer += Time.deltaTime;
-
-        if (stateChangeTimer < requiredDelay)
+        if (currentState == PlanetVisualState.Burnt)
         {
-            return;
+            if (!isIlluminated)
+            {
+                burntToFrozenTimer += Time.deltaTime;
+            }
+            else
+            {
+                burntToFrozenTimer = 0f;
+            }
+        }
+        else
+        {
+            burntToFrozenTimer = 0f;
         }
 
-        StartTransitionToState(pendingState);
-        currentState = pendingState;
-        stateChangeTimer = 0f;
-        aliveElapsedTime = 0f;
+        // Determine desired state
+        PlanetVisualState desiredState = CalculateDesiredState();
+
+        // If state should change
+        if (desiredState != currentState)
+        {
+            StartTransitionToState(desiredState);
+            currentState = desiredState;
+            // Reset all timers on state change
+            frozenToAliveTimer = 0f;
+            aliveToFrozenTimer = 0f;
+            aliveToBurntTimer = 0f;
+            burntToFrozenTimer = 0f;
+        }
     }
 
     private PlanetVisualState CalculateDesiredState()
@@ -279,51 +318,39 @@ public class TransitionMaterials : MonoBehaviour
         switch (currentState)
         {
             case PlanetVisualState.Frozen:
-                return isIlluminated ? PlanetVisualState.Alive : PlanetVisualState.Frozen;
+                // Frozen → Alive when illuminated long enough
+                return (isIlluminated && frozenToAliveTimer >= frozenToAliveDelay) ? PlanetVisualState.Alive : PlanetVisualState.Frozen;
 
             case PlanetVisualState.Alive:
-                return !isIlluminated ? PlanetVisualState.Frozen : PlanetVisualState.Alive;
+                // Alive → Burnt when illuminated long enough
+                if (isIlluminated && aliveToBurntTimer >= aliveToBurntDelay)
+                    return PlanetVisualState.Burnt;
+
+                // Alive → Frozen when not illuminated long enough
+                if (!isIlluminated && aliveToFrozenTimer >= aliveToFrozenDelay)
+                    return PlanetVisualState.Frozen;
+
+                return PlanetVisualState.Alive;
 
             case PlanetVisualState.Burnt:
-                return !isIlluminated ? PlanetVisualState.Frozen : PlanetVisualState.Burnt;
+                // Burnt → Frozen when not illuminated long enough
+                return (!isIlluminated && burntToFrozenTimer >= burntToFrozenDelay) ? PlanetVisualState.Frozen : PlanetVisualState.Burnt;
 
             default:
                 return PlanetVisualState.Frozen;
         }
     }
 
-    private bool IsValidTransition(PlanetVisualState from, PlanetVisualState to)
-    {
-        if (from == PlanetVisualState.Frozen && to == PlanetVisualState.Alive) return true;
-        if (from == PlanetVisualState.Alive && to == PlanetVisualState.Frozen) return true;
-        if (from == PlanetVisualState.Alive && to == PlanetVisualState.Burnt) return true;
-        if (from == PlanetVisualState.Burnt && to == PlanetVisualState.Frozen) return true;
-        return false;
-    }
-
-    private float GetTransitionDelay(PlanetVisualState from, PlanetVisualState to)
-    {
-        if (from == PlanetVisualState.Frozen && to == PlanetVisualState.Alive)
-            return delayFrozenToAlive;
-        if (from == PlanetVisualState.Alive && to == PlanetVisualState.Frozen)
-            return delayAliveToFrozen;
-        if (from == PlanetVisualState.Alive && to == PlanetVisualState.Burnt)
-            return delayAliveToBurnt;
-        if (from == PlanetVisualState.Burnt && to == PlanetVisualState.Frozen)
-            return delayBurntToFrozen;
-        return 0f;
-    }
-
-    private Material GetBaseStateReferenceMaterial(PlanetVisualState state)
+    private Material GetStateReferenceMaterial(PlanetVisualState state)
     {
         switch (state)
         {
             case PlanetVisualState.Alive:
-                return aliveBaseStateMaterial;
+                return aliveStateMaterial;
             case PlanetVisualState.Burnt:
-                return burntBaseStateMaterial;
+                return burntStateMaterial;
             default:
-                return frozenBaseStateMaterial;
+                return frozenStateMaterial;
         }
     }
 
@@ -340,183 +367,111 @@ public class TransitionMaterials : MonoBehaviour
         }
     }
 
-    private void ExtractAllFloatsAndColors(Material source, System.Collections.Generic.Dictionary<int, float> outFloats, System.Collections.Generic.Dictionary<int, Color> outColors)
+    private RuntimeBlendValues ToBlendValues(Material source)
     {
         if (source == null)
         {
-            return;
+            return currentValues;
         }
 
-        outFloats.Clear();
-        outColors.Clear();
-
-#if UNITY_EDITOR
-        // In editor, use ShaderUtil to get all properties
-        Shader shader = source.shader;
-        int propertyCount = ShaderUtil.GetPropertyCount(shader);
-
-        for (int i = 0; i < propertyCount; i++)
+        return new RuntimeBlendValues
         {
-            string propName = ShaderUtil.GetPropertyName(shader, i);
-            int propId = Shader.PropertyToID(propName);
-            ShaderUtil.ShaderPropertyType propType = ShaderUtil.GetPropertyType(shader, i);
-
-            if (propType == ShaderUtil.ShaderPropertyType.Float && source.HasProperty(propId))
-            {
-                float value = source.GetFloat(propId);
-                outFloats[propId] = value;
-                if (debugLogging)
-                    Debug.Log($"[TransitionMaterials] Extracted FLOAT: {propName} = {value}");
-            }
-            else if (propType == ShaderUtil.ShaderPropertyType.Color && source.HasProperty(propId))
-            {
-                Color value = source.GetColor(propId);
-                outColors[propId] = value;
-                if (debugLogging)
-                    Debug.Log($"[TransitionMaterials] Extracted COLOR: {propName} = {value}");
-            }
-        }
-#else
-        // Runtime fallback: complete list from the shader
-        string[] floatProperties = new string[]
-        {
-            "_TransitionMainToSecondaryTexture",
-            "_TransitionWater",
-            "_WaterOpacity"
+            transitionMainToSecondaryTexture = source.HasProperty(TransitionMainToSecondaryTextureId)
+                ? source.GetFloat(TransitionMainToSecondaryTextureId)
+                : 0f,
+            transitionWater = source.HasProperty(TransitionWaterId)
+                ? source.GetFloat(TransitionWaterId)
+                : 0f,
+            planetBaseColor = source.HasProperty(PlanetBaseColorId)
+                ? source.GetColor(PlanetBaseColorId)
+                : Color.white,
+            planetLayerColor = source.HasProperty(PlanetLayerColorId)
+                ? source.GetColor(PlanetLayerColorId)
+                : Color.white,
+            planetSecondaryColor = source.HasProperty(PlanetSecondaryColorId)
+                ? source.GetColor(PlanetSecondaryColorId)
+                : Color.white
         };
-
-        foreach (string propName in floatProperties)
-        {
-            int propId = Shader.PropertyToID(propName);
-            if (source.HasProperty(propId))
-            {
-                float value = source.GetFloat(propId);
-                outFloats[propId] = value;
-                if (debugLogging)
-                    Debug.Log($"[TransitionMaterials] Extracted FLOAT: {propName} = {value}");
-            }
-        }
-
-        string[] colorProperties = new string[]
-        {
-            "_PlanetBaseColor",
-            "_PlanetWaterColor",
-            "_PlanetSecondaryColor"
-        };
-
-        foreach (string propName in colorProperties)
-        {
-            int propId = Shader.PropertyToID(propName);
-            if (source.HasProperty(propId))
-            {
-                Color value = source.GetColor(propId);
-                outColors[propId] = value;
-                if (debugLogging)
-                    Debug.Log($"[TransitionMaterials] Extracted COLOR: {propName} = {value}");
-            }
-        }
-#endif
     }
 
-    private void ExtractAllTextures(Material source, System.Collections.Generic.Dictionary<int, Texture> outTextures)
+    private RuntimeFresnelBlendValues ToFresnelBlendValues(Material source)
     {
         if (source == null)
         {
-            return;
+            return currentFresnelValues;
         }
 
-        outTextures.Clear();
-
-#if UNITY_EDITOR
-        // In editor, use ShaderUtil to get all texture properties
-        Shader shader = source.shader;
-        int propertyCount = ShaderUtil.GetPropertyCount(shader);
-
-        for (int i = 0; i < propertyCount; i++)
+        return new RuntimeFresnelBlendValues
         {
-            string propName = ShaderUtil.GetPropertyName(shader, i);
-            int propId = Shader.PropertyToID(propName);
-            ShaderUtil.ShaderPropertyType propType = ShaderUtil.GetPropertyType(shader, i);
-
-            if (propType == ShaderUtil.ShaderPropertyType.TexEnv && source.HasProperty(propId))
-            {
-                Texture tex = source.GetTexture(propId);
-                if (tex != null)
-                {
-                    outTextures[propId] = tex;
-                }
-            }
-        }
-#else
-        // Runtime fallback: complete list from the shader
-        string[] textureProperties = new string[]
-        {
-            "_PlanetMask",
-            "_PlanetMaskGradiant",
-            "_PlanetBaseNormal",
-            "_PlanetBaseTexture",
-            "_PlanetWaterNormal",
-            "_PlanetWaterTexture",
-            "_PlanetSecondaryNormal",
-            "_PlanetSecondaryTexture"
+            rimIntensity = source.HasProperty(RimIntensityId)
+                ? source.GetFloat(RimIntensityId)
+                : 1f,
+            atmosphereIntensity = source.HasProperty(AtmosphereIntensityId)
+                ? source.GetFloat(AtmosphereIntensityId)
+                : 1f,
+            color = source.HasProperty(FresnelColorId)
+                ? source.GetColor(FresnelColorId)
+                : Color.white,
+            noiseSpeed = source.HasProperty(NoiseSpeedId)
+                ? source.GetFloat(NoiseSpeedId)
+                : 1f,
+            noiseScale = source.HasProperty(NoiseScaleId)
+                ? source.GetFloat(NoiseScaleId)
+                : 1f,
+            emissiveStrength = source.HasProperty(EmissiveStrengthId)
+                ? source.GetFloat(EmissiveStrengthId)
+                : 1f
         };
-
-        foreach (string propName in textureProperties)
-        {
-            int propId = Shader.PropertyToID(propName);
-            if (source.HasProperty(propId))
-            {
-                Texture tex = source.GetTexture(propId);
-                if (tex != null)
-                {
-                    outTextures[propId] = tex;
-                }
-            }
-        }
-#endif
     }
 
-    private void ApplyTextures(Material destinationMaterial, Material stateMaterial)
+    private void ApplyTextures(Material baseMaterial, Material fresnelMaterial)
     {
-        if (destinationMaterial == null || stateMaterial == null)
+        if (runtimeMaterial == null || baseMaterial == null)
         {
             return;
         }
 
-        SetTextureFromMaterialIfExists(destinationMaterial, PlanetMaskId, stateMaterial);
-        SetTextureFromMaterialIfExists(destinationMaterial, PlanetMaskGradiantId, stateMaterial);
-        SetTextureFromMaterialIfExists(destinationMaterial, PlanetBaseNormalId, stateMaterial);
-        SetTextureFromMaterialIfExists(destinationMaterial, PlanetBaseTextureId, stateMaterial);
-        SetTextureFromMaterialIfExists(destinationMaterial, PlanetLayerNormalId, stateMaterial);
-        SetTextureFromMaterialIfExists(destinationMaterial, PlanetLayerTextureId, stateMaterial);
-        SetTextureFromMaterialIfExists(destinationMaterial, PlanetSecondaryNormalId, stateMaterial);
-        SetTextureFromMaterialIfExists(destinationMaterial, PlanetSecondaryTextureId, stateMaterial);
+        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetMaskId, baseMaterial);
+        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetMaskGradiantId, baseMaterial);
+        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetBaseNormalId, baseMaterial);
+        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetBaseTextureId, baseMaterial);
+        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetLayerNormalId, baseMaterial);
+        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetLayerTextureId, baseMaterial);
+        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetSecondaryNormalId, baseMaterial);
+        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetSecondaryTextureId, baseMaterial);
+
+        if (runtimeFresnelMaterial != null && fresnelMaterial != null)
+        {
+            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetMaskId, fresnelMaterial);
+            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetMaskGradiantId, fresnelMaterial);
+            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetBaseNormalId, fresnelMaterial);
+            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetBaseTextureId, fresnelMaterial);
+            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetLayerNormalId, fresnelMaterial);
+            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetLayerTextureId, fresnelMaterial);
+            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetSecondaryNormalId, fresnelMaterial);
+            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetSecondaryTextureId, fresnelMaterial);
+        }
     }
 
     private void StartTransitionToState(PlanetVisualState state)
     {
-        // Ensure this is a valid transition
-        if (!IsValidTransition(currentState, state))
-        {
-            Debug.LogWarning($"Attempted invalid transition: {currentState} -> {state}");
-            return;
-        }
-
-        Material targetBaseMaterial = GetBaseStateReferenceMaterial(state);
+        Material targetMaterial = GetStateReferenceMaterial(state);
         Material targetFresnelMaterial = GetFresnelStateReferenceMaterial(state);
-
-        if (targetBaseMaterial == null || targetFresnelMaterial == null)
+        
+        if (targetMaterial == null || targetFresnelMaterial == null)
         {
             return;
         }
 
-        // Apply textures immediately
-        ApplyTextures(runtimeBaseMaterial, targetBaseMaterial);
-        ApplyTextures(runtimeFresnelMaterial, targetFresnelMaterial);
-
-        // Create snapshots of current and target materials
-        var fromBaseMat = new Material(runtimeBaseMaterial);
-        var fromFresnelMat = new Material(runtimeFresnelMaterial);
+        ApplyTextures(targetMaterial, targetFresnelMaterial);
+        
+        // Base material transition
+        RuntimeBlendValues fromValues = currentValues;
+        RuntimeBlendValues toValues = ToBlendValues(targetMaterial);
+        
+        // Fresnel material transition
+        RuntimeFresnelBlendValues fromFresnelValues = currentFresnelValues;
+        RuntimeFresnelBlendValues toFresnelValues = ToFresnelBlendValues(targetFresnelMaterial);
 
         if (activeTransitionTween != null && activeTransitionTween.IsActive())
         {
@@ -530,153 +485,97 @@ public class TransitionMaterials : MonoBehaviour
         {
             tweenProgress = x;
             
-            // Blend base material: copy all properties from target, lerped
-            BlendMaterialProperties(runtimeBaseMaterial, fromBaseMat, targetBaseMaterial, tweenProgress);
+            // Interpolate base material
+            currentValues.transitionMainToSecondaryTexture = Mathf.Lerp(fromValues.transitionMainToSecondaryTexture, toValues.transitionMainToSecondaryTexture, tweenProgress);
+            currentValues.transitionWater = Mathf.Lerp(fromValues.transitionWater, toValues.transitionWater, tweenProgress);
+            currentValues.planetBaseColor = Color.Lerp(fromValues.planetBaseColor, toValues.planetBaseColor, tweenProgress);
+            currentValues.planetLayerColor = Color.Lerp(fromValues.planetLayerColor, toValues.planetLayerColor, tweenProgress);
+            currentValues.planetSecondaryColor = Color.Lerp(fromValues.planetSecondaryColor, toValues.planetSecondaryColor, tweenProgress);
             
-            // Blend fresnel material: copy all properties from target, lerped
-            BlendMaterialProperties(runtimeFresnelMaterial, fromFresnelMat, targetFresnelMaterial, tweenProgress);
+            // Interpolate fresnel material separately
+            currentFresnelValues.rimIntensity = Mathf.Lerp(fromFresnelValues.rimIntensity, toFresnelValues.rimIntensity, tweenProgress);
+            currentFresnelValues.atmosphereIntensity = Mathf.Lerp(fromFresnelValues.atmosphereIntensity, toFresnelValues.atmosphereIntensity, tweenProgress);
+            currentFresnelValues.color = Color.Lerp(fromFresnelValues.color, toFresnelValues.color, tweenProgress);
+            currentFresnelValues.noiseSpeed = Mathf.Lerp(fromFresnelValues.noiseSpeed, toFresnelValues.noiseSpeed, tweenProgress);
+            currentFresnelValues.noiseScale = Mathf.Lerp(fromFresnelValues.noiseScale, toFresnelValues.noiseScale, tweenProgress);
+            currentFresnelValues.emissiveStrength = Mathf.Lerp(fromFresnelValues.emissiveStrength, toFresnelValues.emissiveStrength, tweenProgress);
             
-            if (debugLogging)
-                Debug.Log($"[TransitionMaterials] Transition progress: {tweenProgress:F2}");
+            ApplyBlendedValues();
         }, 1f, safeDuration)
         .SetEase(transitionEase)
         .SetLink(gameObject)
         .OnComplete(() =>
         {
-            // Final blend to ensure perfect match
-            BlendMaterialProperties(runtimeBaseMaterial, fromBaseMat, targetBaseMaterial, 1f);
-            BlendMaterialProperties(runtimeFresnelMaterial, fromFresnelMat, targetFresnelMaterial, 1f);
-            
-            Destroy(fromBaseMat);
-            Destroy(fromFresnelMat);
-            
-            if (debugLogging)
-                Debug.Log($"[TransitionMaterials] Transition complete to state: {state}");
+            currentValues = toValues;
+            currentFresnelValues = toFresnelValues;
+            ApplyBlendedValues();
         });
     }
 
-    private void BlendMaterialProperties(Material destination, Material fromMat, Material toMat, float t)
+    private void ApplyBlendedValues()
     {
-        if (destination == null || fromMat == null || toMat == null)
-            return;
-
-#if UNITY_EDITOR
-        // In editor: get all properties from shader
-        Shader shader = toMat.shader;
-        int propertyCount = ShaderUtil.GetPropertyCount(shader);
-
-        for (int i = 0; i < propertyCount; i++)
-        {
-            string propName = ShaderUtil.GetPropertyName(shader, i);
-            int propId = Shader.PropertyToID(propName);
-            ShaderUtil.ShaderPropertyType propType = ShaderUtil.GetPropertyType(shader, i);
-
-            if (propType == ShaderUtil.ShaderPropertyType.Float && destination.HasProperty(propId))
-            {
-                float fromVal = fromMat.HasProperty(propId) ? fromMat.GetFloat(propId) : 0f;
-                float toVal = toMat.HasProperty(propId) ? toMat.GetFloat(propId) : 0f;
-                destination.SetFloat(propId, Mathf.Lerp(fromVal, toVal, t));
-            }
-            else if (propType == ShaderUtil.ShaderPropertyType.Color && destination.HasProperty(propId))
-            {
-                Color fromVal = fromMat.HasProperty(propId) ? fromMat.GetColor(propId) : Color.white;
-                Color toVal = toMat.HasProperty(propId) ? toMat.GetColor(propId) : Color.white;
-                destination.SetColor(propId, Color.Lerp(fromVal, toVal, t));
-            }
-        }
-#else
-        // Runtime fallback: blend all common properties
-        string[] allProperties = new string[]
-        {
-            "_TransitionMainToSecondaryTexture", "_TransitionWater", "_WaterOpacity",
-            "_PlanetBaseColor", "_PlanetWaterColor", "_PlanetSecondaryColor"
-        };
-
-        foreach (string propName in allProperties)
-        {
-            int propId = Shader.PropertyToID(propName);
-            if (destination.HasProperty(propId))
-            {
-                try
-                {
-                    float fromVal = fromMat.HasProperty(propId) ? fromMat.GetFloat(propId) : 0f;
-                    float toVal = toMat.HasProperty(propId) ? toMat.GetFloat(propId) : 0f;
-                    destination.SetFloat(propId, Mathf.Lerp(fromVal, toVal, t));
-                }
-                catch { }
-            }
-        }
-
-        string[] colorProperties = new string[]
-        {
-            "_PlanetBaseColor", "_PlanetWaterColor", "_PlanetSecondaryColor"
-        };
-
-        foreach (string propName in colorProperties)
-        {
-            int propId = Shader.PropertyToID(propName);
-            if (destination.HasProperty(propId))
-            {
-                try
-                {
-                    Color fromVal = fromMat.HasProperty(propId) ? fromMat.GetColor(propId) : Color.white;
-                    Color toVal = toMat.HasProperty(propId) ? toMat.GetColor(propId) : Color.white;
-                    destination.SetColor(propId, Color.Lerp(fromVal, toVal, t));
-                }
-                catch { }
-            }
-        }
-#endif
-    }
-
-    private void ApplyAllFloatsAndColors()
-    {
-        if (runtimeBaseMaterial == null)
+        if (runtimeMaterial == null)
         {
             return;
         }
 
-        foreach (var kvp in currentFloats)
+        // Apply base material values
+        if (runtimeMaterial.HasProperty(TransitionMainToSecondaryTextureId))
         {
-            if (runtimeBaseMaterial.HasProperty(kvp.Key))
-            {
-                runtimeBaseMaterial.SetFloat(kvp.Key, kvp.Value);
-                if (debugLogging)
-                    Debug.Log($"[TransitionMaterials] Applied FLOAT: PropertyID {kvp.Key} = {kvp.Value}");
-            }
-            else if (debugLogging)
-            {
-                Debug.LogWarning($"[TransitionMaterials] Material missing property: {kvp.Key}");
-            }
+            runtimeMaterial.SetFloat(TransitionMainToSecondaryTextureId, currentValues.transitionMainToSecondaryTexture);
         }
 
-        foreach (var kvp in currentColors)
+        if (runtimeMaterial.HasProperty(TransitionWaterId))
         {
-            if (runtimeBaseMaterial.HasProperty(kvp.Key))
-            {
-                runtimeBaseMaterial.SetColor(kvp.Key, kvp.Value);
-                if (debugLogging)
-                    Debug.Log($"[TransitionMaterials] Applied COLOR: PropertyID {kvp.Key} = {kvp.Value}");
-            }
-            else if (debugLogging)
-            {
-                Debug.LogWarning($"[TransitionMaterials] Material missing property: {kvp.Key}");
-            }
-        }
-    }
-
-    private void ApplyAllTextures()
-    {
-        if (runtimeBaseMaterial == null)
-        {
-            return;
+            runtimeMaterial.SetFloat(TransitionWaterId, currentValues.transitionWater);
         }
 
-        foreach (var kvp in currentTextures)
+        if (runtimeMaterial.HasProperty(PlanetBaseColorId))
         {
-            if (runtimeBaseMaterial.HasProperty(kvp.Key) && kvp.Value != null)
+            runtimeMaterial.SetColor(PlanetBaseColorId, currentValues.planetBaseColor);
+        }
+
+        if (runtimeMaterial.HasProperty(PlanetLayerColorId))
+        {
+            runtimeMaterial.SetColor(PlanetLayerColorId, currentValues.planetLayerColor);
+        }
+
+        if (runtimeMaterial.HasProperty(PlanetSecondaryColorId))
+        {
+            runtimeMaterial.SetColor(PlanetSecondaryColorId, currentValues.planetSecondaryColor);
+        }
+
+        // Apply Fresnel material values (separately with fresnel-specific properties)
+        if (runtimeFresnelMaterial != null)
+        {
+            if (runtimeFresnelMaterial.HasProperty(RimIntensityId))
             {
-                runtimeBaseMaterial.SetTexture(kvp.Key, kvp.Value);
+                runtimeFresnelMaterial.SetFloat(RimIntensityId, currentFresnelValues.rimIntensity);
+            }
+
+            if (runtimeFresnelMaterial.HasProperty(AtmosphereIntensityId))
+            {
+                runtimeFresnelMaterial.SetFloat(AtmosphereIntensityId, currentFresnelValues.atmosphereIntensity);
+            }
+
+            if (runtimeFresnelMaterial.HasProperty(FresnelColorId))
+            {
+                runtimeFresnelMaterial.SetColor(FresnelColorId, currentFresnelValues.color);
+            }
+
+            if (runtimeFresnelMaterial.HasProperty(NoiseSpeedId))
+            {
+                runtimeFresnelMaterial.SetFloat(NoiseSpeedId, currentFresnelValues.noiseSpeed);
+            }
+
+            if (runtimeFresnelMaterial.HasProperty(NoiseScaleId))
+            {
+                runtimeFresnelMaterial.SetFloat(NoiseScaleId, currentFresnelValues.noiseScale);
+            }
+
+            if (runtimeFresnelMaterial.HasProperty(EmissiveStrengthId))
+            {
+                runtimeFresnelMaterial.SetFloat(EmissiveStrengthId, currentFresnelValues.emissiveStrength);
             }
         }
     }
@@ -694,17 +593,6 @@ public class TransitionMaterials : MonoBehaviour
         if (activeTransitionTween != null && activeTransitionTween.IsActive())
         {
             activeTransitionTween.Kill();
-        }
-
-        // Clean up material instances
-        if (runtimeBaseMaterial != null)
-        {
-            Destroy(runtimeBaseMaterial);
-        }
-
-        if (runtimeFresnelMaterial != null)
-        {
-            Destroy(runtimeFresnelMaterial);
         }
     }
 }
