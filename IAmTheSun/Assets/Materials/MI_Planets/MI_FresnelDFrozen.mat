@@ -56,12 +56,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AtmosphereIntensity: 3
+    - _AtmosphereIntensity: -0.05
+    - _EmissiveStrenght: 0
     - _NoiseScale: 100
     - _NoiseSpeed: 0.05
     - _QueueControl: 0
     - _QueueOffset: 20
-    - _RimIntensity: 0.5
+    - _RimIntensity: 2
     - _TransparancyIntensity: 0.1
     - _UseNoise: 1
     - _XRMotionVectorsPass: 1
