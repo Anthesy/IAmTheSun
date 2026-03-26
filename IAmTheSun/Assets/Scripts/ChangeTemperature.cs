@@ -7,6 +7,7 @@ public class ChangeTemperature : MonoBehaviour
     [SerializeField] private bool debugRay;
     [SerializeField] private bool debugOverlayInBuild;
     [SerializeField] private Vector3 debugOverlayLocalOffset = new Vector3(0f, -0.08f, 0.6f);
+    [SerializeField] private bool followVRHead = true;
 
     private TransitionMaterials currentPlanetTransition;
     private Camera mainCamera;
@@ -26,6 +27,13 @@ public class ChangeTemperature : MonoBehaviour
         if (rayOrigin == null)
         {
             return;
+        }
+
+        // Suivre la tête du joueur en VR
+        if (followVRHead && mainCamera != null)
+        {
+            transform.position = mainCamera.transform.position;
+            transform.rotation = mainCamera.transform.rotation;
         }
 
         var ray = new Ray(rayOrigin.position, rayOrigin.forward);
