@@ -57,6 +57,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AtmosphereIntensity: 0.49
+    - _EmissiveStrenght: 0.5
     - _NoiseScale: 100
     - _NoiseSpeed: 0.05
     - _QueueControl: 0

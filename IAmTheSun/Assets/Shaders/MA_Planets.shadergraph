@@ -224,6 +224,9 @@
         },
         {
             "m_Id": "7232239c7584406590acad3eed503853"
+        },
+        {
+            "m_Id": "ab5fb6df40bb4dbea979027cf82aacac"
         }
     ],
     "m_GroupDatas": [],
@@ -644,7 +647,7 @@
             },
             "m_InputSlot": {
                 "m_Node": {
-                    "m_Id": "9c3b0a6b28c348e4b3a233afdecf6e51"
+                    "m_Id": "ab5fb6df40bb4dbea979027cf82aacac"
                 },
                 "m_SlotId": 0
             }
@@ -731,6 +734,20 @@
                     "m_Id": "43eb77786af34ee795eed89e975e563f"
                 },
                 "m_SlotId": 1
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "ab5fb6df40bb4dbea979027cf82aacac"
+                },
+                "m_SlotId": 2
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "9c3b0a6b28c348e4b3a233afdecf6e51"
+                },
+                "m_SlotId": 0
             }
         },
         {
@@ -989,10 +1006,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -1733.5999755859375,
-            "y": -156.0,
-            "width": 144.0,
-            "height": 33.59999084472656
+            "x": -1817.600341796875,
+            "y": -156.80001831054688,
+            "width": 144.800048828125,
+            "height": 33.599998474121097
         }
     },
     "m_Slots": [
@@ -2200,7 +2217,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Texture2DMaterialSlot",
     "m_ObjectId": "3a72b3222e1141f7bf67674e0627378d",
     "m_Id": 0,
-    "m_DisplayName": "PlanetLayerTexture",
+    "m_DisplayName": "PlanetWaterTexture",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2923,10 +2940,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -1732.7999267578125,
-            "y": -131.20001220703126,
+            "x": -1816.80029296875,
+            "y": -132.00003051757813,
             "width": 208.0,
-            "height": 430.39996337890627
+            "height": 430.40008544921877
         }
     },
     "m_Slots": [
@@ -2969,6 +2986,31 @@
     "m_NormalMapSpace": 0,
     "m_EnableGlobalMipBias": true,
     "m_MipSamplingMode": 0
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
+    "m_ObjectId": "512cc5e486094f71a8c9fc454291a709",
+    "m_Id": 2,
+    "m_DisplayName": "Out",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_LiteralMode": false
 }
 
 {
@@ -4263,6 +4305,31 @@
 }
 
 {
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
+    "m_ObjectId": "7cfb4ea4daac4dd7b02757d09081620f",
+    "m_Id": 1,
+    "m_DisplayName": "B",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "B",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.30000001192092898,
+        "y": 0.30000001192092898,
+        "z": 0.30000001192092898,
+        "w": 1.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_LiteralMode": false
+}
+
+{
     "m_SGVersion": 1,
     "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
     "m_ObjectId": "7d29fdf773864e4b9a7171b28eed4f23",
@@ -4518,7 +4585,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "86333667d50e4b68ab7a5ec4d78eba4a",
     "m_Id": 0,
-    "m_DisplayName": "PlanetLayerColor",
+    "m_DisplayName": "PlanetWaterColor",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -4642,7 +4709,7 @@
     "m_Hidden": false,
     "m_PerRendererData": false,
     "m_customAttributes": [],
-    "m_Value": 0.0,
+    "m_Value": 1.0,
     "m_FloatType": 1,
     "m_LiteralFloatMode": false,
     "m_RangeValues": {
@@ -5396,10 +5463,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -1357.60009765625,
-            "y": -408.79998779296877,
+            "x": -1368.8001708984375,
+            "y": -391.1999816894531,
             "width": 146.4000244140625,
-            "height": 33.5999755859375
+            "height": 33.60003662109375
         }
     },
     "m_Slots": [
@@ -5631,6 +5698,50 @@
     "m_DefaultValue": 0.0,
     "m_Labels": [],
     "m_LiteralMode": false
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.SubtractNode",
+    "m_ObjectId": "ab5fb6df40bb4dbea979027cf82aacac",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "Subtract",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": -236.0,
+            "y": -448.79998779296877,
+            "width": 208.0,
+            "height": 301.5999755859375
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "d181f36398f945fe89a6f832d394e6b7"
+        },
+        {
+            "m_Id": "7cfb4ea4daac4dd7b02757d09081620f"
+        },
+        {
+            "m_Id": "512cc5e486094f71a8c9fc454291a709"
+        }
+    ],
+    "synonyms": [
+        "subtraction",
+        "remove",
+        "minus",
+        "take away"
+    ],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    }
 }
 
 {
@@ -5886,7 +5997,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Texture2DMaterialSlot",
     "m_ObjectId": "ba63aa7e1ea44769ac25d7b8a9d250d3",
     "m_Id": 0,
-    "m_DisplayName": "PlanetLayerNormal",
+    "m_DisplayName": "PlanetWaterNormal",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -6293,6 +6404,31 @@
         "y": 0.0,
         "z": 0.0,
         "w": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_LiteralMode": false
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
+    "m_ObjectId": "d181f36398f945fe89a6f832d394e6b7",
+    "m_Id": 0,
+    "m_DisplayName": "A",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "A",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0,
+        "w": 1.0
     },
     "m_DefaultValue": {
         "x": 0.0,
