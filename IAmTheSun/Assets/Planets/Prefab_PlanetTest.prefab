@@ -101,50 +101,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TransitionMaterials
   targetRenderer: {fileID: 9068812256985493986}
   materialIndex: 0
-  transitionSpeed: 5
+  transitionDuration: 1.2
+  transitionEase: 4
   burnDelay: 2
-  frozenState:
-    transitionMainToSecondaryTexture: 0.5
-    transitionWater: 2
-    planetMask: {fileID: 2800000, guid: 8bf152aa1c27a8f499b7cebbce6d52ee, type: 3}
-    planetMaskGradiant: {fileID: 2800000, guid: 85773a3f8646db548ad7112889f866b8, type: 3}
-    planetBaseNormal: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
-    planetBaseTexture: {fileID: 2800000, guid: 1a3c3caf317df60408ea1ef54f80fe2f, type: 3}
-    planetBaseColor: {r: 0.62419903, g: 0.77799314, b: 0.7830189, a: 0}
-    planetLayerNormal: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
-    planetLayerTexture: {fileID: 2800000, guid: f1c3b0e0e52346143bdc5796ce183e04, type: 3}
-    planetLayerColor: {r: 0.25471696, g: 0.30633962, b: 0.33962262, a: 0}
-    planetSecondaryNormal: {fileID: 2800000, guid: e6d28b274c301d94881019e80cdb8c62, type: 3}
-    planetSecondaryTexture: {fileID: 2800000, guid: 2cfd9ec5d1218e949b28de738ca0c790, type: 3}
-    planetSecondaryColor: {r: 0.62352943, g: 0.77647066, b: 0.7843138, a: 0}
-  aliveState:
-    transitionMainToSecondaryTexture: 0
-    transitionWater: 0
-    planetMask: {fileID: 2800000, guid: 8bf152aa1c27a8f499b7cebbce6d52ee, type: 3}
-    planetMaskGradiant: {fileID: 2800000, guid: 85773a3f8646db548ad7112889f866b8, type: 3}
-    planetBaseNormal: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
-    planetBaseTexture: {fileID: 2800000, guid: 1a3c3caf317df60408ea1ef54f80fe2f, type: 3}
-    planetBaseColor: {r: 0.46705455, g: 0.9433962, b: 0.44054815, a: 0}
-    planetLayerNormal: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
-    planetLayerTexture: {fileID: 2800000, guid: f1c3b0e0e52346143bdc5796ce183e04, type: 3}
-    planetLayerColor: {r: 0.34069064, g: 0.6398284, b: 0.8301887, a: 0}
-    planetSecondaryNormal: {fileID: 2800000, guid: e6d28b274c301d94881019e80cdb8c62, type: 3}
-    planetSecondaryTexture: {fileID: 2800000, guid: 2cfd9ec5d1218e949b28de738ca0c790, type: 3}
-    planetSecondaryColor: {r: 0.4666667, g: 0.9450981, b: 0.43921572, a: 0}
-  burntState:
-    transitionMainToSecondaryTexture: 1
-    transitionWater: 6
-    planetMask: {fileID: 2800000, guid: 8bf152aa1c27a8f499b7cebbce6d52ee, type: 3}
-    planetMaskGradiant: {fileID: 2800000, guid: 85773a3f8646db548ad7112889f866b8, type: 3}
-    planetBaseNormal: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
-    planetBaseTexture: {fileID: 2800000, guid: 1a3c3caf317df60408ea1ef54f80fe2f, type: 3}
-    planetBaseColor: {r: 0.9333334, g: 0.72156864, b: 0.40000004, a: 0}
-    planetLayerNormal: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
-    planetLayerTexture: {fileID: 2800000, guid: f1c3b0e0e52346143bdc5796ce183e04, type: 3}
-    planetLayerColor: {r: 0.4056604, g: 0.27721712, b: 0.19326274, a: 1}
-    planetSecondaryNormal: {fileID: 2800000, guid: e6d28b274c301d94881019e80cdb8c62, type: 3}
-    planetSecondaryTexture: {fileID: 2800000, guid: 2cfd9ec5d1218e949b28de738ca0c790, type: 3}
-    planetSecondaryColor: {r: 0.9339623, g: 0.7209802, b: 0.4008988, a: 0}
+  frozenStateMaterial: {fileID: 2100000, guid: f1491718ae431f543908213b6a919c3f, type: 2}
+  aliveStateMaterial: {fileID: 2100000, guid: bba8c58729a1f684582d30a49db6c561, type: 2}
+  burntStateMaterial: {fileID: 2100000, guid: 3f130af973943434f892ea5b2185967c, type: 2}
 --- !u!135 &8105208923218879705
 SphereCollider:
   m_ObjectHideFlags: 0
