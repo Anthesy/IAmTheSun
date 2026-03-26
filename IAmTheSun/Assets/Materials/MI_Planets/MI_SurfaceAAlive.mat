@@ -29,7 +29,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetBaseTexture:
-        m_Texture: {fileID: 2800000, guid: 5bd6a6d6dac0b444ebcb72d5e49e5516, type: 3}
+        m_Texture: {fileID: 2800000, guid: f1c3b0e0e52346143bdc5796ce183e04, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetLayerNormal:
@@ -49,15 +49,15 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetSecondaryNormal:
-        m_Texture: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
+        m_Texture: {fileID: 2800000, guid: 094ffcc9c38e8ea4ab92b9e79297fd12, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetSecondaryTexture:
-        m_Texture: {fileID: 2800000, guid: f3b396fdc1576ea4c9e6bec74a1db040, type: 3}
+        m_Texture: {fileID: 2800000, guid: 5bd6a6d6dac0b444ebcb72d5e49e5516, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetWaterNormal:
-        m_Texture: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
+        m_Texture: {fileID: 2800000, guid: 094ffcc9c38e8ea4ab92b9e79297fd12, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetWaterTexture:
@@ -88,11 +88,11 @@ Material:
     m_Floats:
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _TransitionMainToSecondaryTexture: 0
+    - _TransitionMainToSecondaryTexture: 1
     - _TransitionWater: 0
     - _WaterOpacity: 1
     m_Colors:
-    - _PlanetBaseColor: {r: 1, g: 1, b: 1, a: 0}
+    - _PlanetBaseColor: {r: 1, g: 0.50980395, b: 0.29411766, a: 0}
     - _PlanetLayerColor: {r: 0, g: 0.60784316, b: 1, a: 0}
     - _PlanetSecondaryColor: {r: 1, g: 1, b: 1, a: 0}
     - _PlanetWaterColor: {r: 1, g: 1, b: 1, a: 0}

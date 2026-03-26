@@ -56,8 +56,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AtmosphereIntensity: 3
-    - _NoiseScale: 100
+    - _AtmosphereIntensity: -0.05
+    - _NoiseScale: 0
     - _NoiseSpeed: 0.05
     - _QueueControl: 0
     - _QueueOffset: 20
@@ -66,6 +66,6 @@ Material:
     - _UseNoise: 1
     - _XRMotionVectorsPass: 1
     m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0.5379462, g: 0.111320674, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

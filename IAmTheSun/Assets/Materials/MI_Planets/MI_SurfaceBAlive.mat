@@ -25,11 +25,11 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _PlanetBaseNormal:
-        m_Texture: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
+        m_Texture: {fileID: 2800000, guid: e6d28b274c301d94881019e80cdb8c62, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetBaseTexture:
-        m_Texture: {fileID: 2800000, guid: f3b396fdc1576ea4c9e6bec74a1db040, type: 3}
+        m_Texture: {fileID: 2800000, guid: b818bcf515ff66c4db690e4577929a80, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetLayerNormal:
@@ -41,19 +41,19 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetMask:
-        m_Texture: {fileID: 2800000, guid: dbdf79bd08310dc4d9871e8dc4645b5e, type: 3}
+        m_Texture: {fileID: 2800000, guid: f3b396fdc1576ea4c9e6bec74a1db040, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetMaskGradiant:
-        m_Texture: {fileID: 2800000, guid: dbdf79bd08310dc4d9871e8dc4645b5e, type: 3}
+        m_Texture: {fileID: 2800000, guid: f3b396fdc1576ea4c9e6bec74a1db040, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetSecondaryNormal:
-        m_Texture: {fileID: 2800000, guid: 7be9deaabccd16942995ebab8369343d, type: 3}
+        m_Texture: {fileID: 2800000, guid: e6d28b274c301d94881019e80cdb8c62, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetSecondaryTexture:
-        m_Texture: {fileID: 2800000, guid: f3b396fdc1576ea4c9e6bec74a1db040, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2cfd9ec5d1218e949b28de738ca0c790, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PlanetWaterNormal:
@@ -88,13 +88,13 @@ Material:
     m_Floats:
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _TransitionMainToSecondaryTexture: 0
-    - _TransitionWater: 6
+    - _TransitionMainToSecondaryTexture: 1
+    - _TransitionWater: 3.49
     - _WaterOpacity: 1
     m_Colors:
-    - _PlanetBaseColor: {r: 1, g: 1, b: 1, a: 0}
+    - _PlanetBaseColor: {r: 1, g: 0.7294118, b: 0.7294118, a: 0}
     - _PlanetLayerColor: {r: 0, g: 0.60784316, b: 1, a: 0}
-    - _PlanetSecondaryColor: {r: 1, g: 1, b: 1, a: 0}
+    - _PlanetSecondaryColor: {r: 0.8777614, g: 0.28490567, b: 1, a: 0}
     - _PlanetWaterColor: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
