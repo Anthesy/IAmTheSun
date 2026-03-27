@@ -19,7 +19,8 @@ public class TransitionMaterials : MonoBehaviour
         public float transitionMainToSecondaryTexture;
         public float transitionWater;
         public Color planetBaseColor;
-        public Color planetLayerColor;
+        public float waterOpacity;
+        public Color planetWaterColor;
         public Color planetSecondaryColor;
     }
 
@@ -39,12 +40,13 @@ public class TransitionMaterials : MonoBehaviour
     private static readonly int PlanetMaskGradiantId = Shader.PropertyToID("_PlanetMaskGradiant");
     private static readonly int PlanetBaseNormalId = Shader.PropertyToID("_PlanetBaseNormal");
     private static readonly int PlanetBaseTextureId = Shader.PropertyToID("_PlanetBaseTexture");
-    private static readonly int PlanetLayerNormalId = Shader.PropertyToID("_PlanetLayerNormal");
-    private static readonly int PlanetLayerTextureId = Shader.PropertyToID("_PlanetLayerTexture");
+    private static readonly int PlanetWaterNormalId = Shader.PropertyToID("_PlanetWaterNormal");
+    private static readonly int PlanetWaterTextureId = Shader.PropertyToID("_PlanetWaterTexture");
     private static readonly int PlanetSecondaryNormalId = Shader.PropertyToID("_PlanetSecondaryNormal");
     private static readonly int PlanetSecondaryTextureId = Shader.PropertyToID("_PlanetSecondaryTexture");
     private static readonly int PlanetBaseColorId = Shader.PropertyToID("_PlanetBaseColor");
-    private static readonly int PlanetLayerColorId = Shader.PropertyToID("_PlanetLayerColor");
+    private static readonly int WaterOpacityId = Shader.PropertyToID("_WaterOpacity");
+    private static readonly int PlanetWaterColorId = Shader.PropertyToID("_PlanetWaterColor");
     private static readonly int PlanetSecondaryColorId = Shader.PropertyToID("_PlanetSecondaryColor");
 
     // Fresnel property IDs
@@ -416,8 +418,11 @@ public class TransitionMaterials : MonoBehaviour
             planetBaseColor = source.HasProperty(PlanetBaseColorId)
                 ? source.GetColor(PlanetBaseColorId)
                 : Color.white,
-            planetLayerColor = source.HasProperty(PlanetLayerColorId)
-                ? source.GetColor(PlanetLayerColorId)
+            waterOpacity = source.HasProperty(WaterOpacityId)
+                ? source.GetFloat(WaterOpacityId)
+                : 1f,
+            planetWaterColor = source.HasProperty(PlanetWaterColorId)
+                ? source.GetColor(PlanetWaterColorId)
                 : Color.white,
             planetSecondaryColor = source.HasProperty(PlanetSecondaryColorId)
                 ? source.GetColor(PlanetSecondaryColorId)
@@ -466,8 +471,8 @@ public class TransitionMaterials : MonoBehaviour
         SetTextureFromMaterialIfExists(runtimeMaterial, PlanetMaskGradiantId, baseMaterial);
         SetTextureFromMaterialIfExists(runtimeMaterial, PlanetBaseNormalId, baseMaterial);
         SetTextureFromMaterialIfExists(runtimeMaterial, PlanetBaseTextureId, baseMaterial);
-        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetLayerNormalId, baseMaterial);
-        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetLayerTextureId, baseMaterial);
+        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetWaterNormalId, baseMaterial);
+        SetTextureFromMaterialIfExists(runtimeMaterial, PlanetWaterTextureId, baseMaterial);
         SetTextureFromMaterialIfExists(runtimeMaterial, PlanetSecondaryNormalId, baseMaterial);
         SetTextureFromMaterialIfExists(runtimeMaterial, PlanetSecondaryTextureId, baseMaterial);
 
@@ -477,8 +482,8 @@ public class TransitionMaterials : MonoBehaviour
             SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetMaskGradiantId, fresnelMaterial);
             SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetBaseNormalId, fresnelMaterial);
             SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetBaseTextureId, fresnelMaterial);
-            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetLayerNormalId, fresnelMaterial);
-            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetLayerTextureId, fresnelMaterial);
+            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetWaterNormalId, fresnelMaterial);
+            SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetWaterTextureId, fresnelMaterial);
             SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetSecondaryNormalId, fresnelMaterial);
             SetTextureFromMaterialIfExists(runtimeFresnelMaterial, PlanetSecondaryTextureId, fresnelMaterial);
         }
@@ -523,7 +528,8 @@ public class TransitionMaterials : MonoBehaviour
             currentValues.transitionMainToSecondaryTexture = Mathf.Lerp(fromValues.transitionMainToSecondaryTexture, toValues.transitionMainToSecondaryTexture, tweenProgress);
             currentValues.transitionWater = Mathf.Lerp(fromValues.transitionWater, toValues.transitionWater, tweenProgress);
             currentValues.planetBaseColor = Color.Lerp(fromValues.planetBaseColor, toValues.planetBaseColor, tweenProgress);
-            currentValues.planetLayerColor = Color.Lerp(fromValues.planetLayerColor, toValues.planetLayerColor, tweenProgress);
+            currentValues.waterOpacity = Mathf.Lerp(fromValues.waterOpacity, toValues.waterOpacity, tweenProgress);
+            currentValues.planetWaterColor = Color.Lerp(fromValues.planetWaterColor, toValues.planetWaterColor, tweenProgress);
             currentValues.planetSecondaryColor = Color.Lerp(fromValues.planetSecondaryColor, toValues.planetSecondaryColor, tweenProgress);
             
             // Interpolate fresnel material separately
@@ -569,9 +575,14 @@ public class TransitionMaterials : MonoBehaviour
             runtimeMaterial.SetColor(PlanetBaseColorId, currentValues.planetBaseColor);
         }
 
-        if (runtimeMaterial.HasProperty(PlanetLayerColorId))
+        if (runtimeMaterial.HasProperty(WaterOpacityId))
         {
-            runtimeMaterial.SetColor(PlanetLayerColorId, currentValues.planetLayerColor);
+            runtimeMaterial.SetFloat(WaterOpacityId, currentValues.waterOpacity);
+        }
+
+        if (runtimeMaterial.HasProperty(PlanetWaterColorId))
+        {
+            runtimeMaterial.SetColor(PlanetWaterColorId, currentValues.planetWaterColor);
         }
 
         if (runtimeMaterial.HasProperty(PlanetSecondaryColorId))
