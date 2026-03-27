@@ -9,6 +9,18 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2404763907846082000, guid: b003340def990a343aedaa14a0b2d3fd, type: 3}
+      propertyPath: aliveStateMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 7cc88baaaef53354497cdf14a3e908b2, type: 2}
+    - target: {fileID: 2404763907846082000, guid: b003340def990a343aedaa14a0b2d3fd, type: 3}
+      propertyPath: burntStateMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 8f6950a939b541c45a373e1b5940c068, type: 2}
+    - target: {fileID: 2404763907846082000, guid: b003340def990a343aedaa14a0b2d3fd, type: 3}
+      propertyPath: frozenStateMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: c75d74fb03b605548b580861a4a29e5e, type: 2}
+    - target: {fileID: 2404763907846082000, guid: b003340def990a343aedaa14a0b2d3fd, type: 3}
       propertyPath: aliveBaseStateMaterial
       value: 
       objectReference: {fileID: 2100000, guid: 7cc88baaaef53354497cdf14a3e908b2, type: 2}
@@ -34,7 +46,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: ebd91fc652fa003438207f6fbe57320c, type: 2}
     - target: {fileID: 7411263361766887479, guid: b003340def990a343aedaa14a0b2d3fd, type: 3}
       propertyPath: m_Name
-      value: PlanetEAlive Variant
+      value: PlanetE
       objectReference: {fileID: 0}
     - target: {fileID: 7895311997943401101, guid: b003340def990a343aedaa14a0b2d3fd, type: 3}
       propertyPath: m_LocalPosition.x
